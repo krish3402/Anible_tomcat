@@ -1,0 +1,49 @@
+---
+  - hosts: webservers
+    remote_user: ubuntu
+    tasks:
+      - name: Installing Required java
+        become: yes
+        apt:
+          name: openjdk-8-jdk
+          state: present
+      - name: Setting Default Java
+        become: yes
+        alternatives:
+          name: java
+          link: /usr/bin/java
+          path: /usr/lib/jvm/java-8-openjdk-amd64/bin/java
+      - name: create folder
+        file: 
+         path: /home/ubuntu/tomcat
+         state: directory
+
+      - name: Downloading require tomcat
+        get_url: 
+           url: http://mirrors.estointernet.in/apache/tomcat/tomcat-8/v8.5.49/bin/apache-tomcat-8.5.49.tar.gz 
+           dest: /home/ubuntu/tomcat
+      - name: Extracting Downloaded tomcat
+        unarchive: 
+            src: /home/ubuntu/tomcat/apache-tomcat-8.5.49.tar.gz 
+            dest: /home/ubuntu/tomcat
+            remote_src: yes
+      - name: replacing default port number
+        synchronize:
+          src: /home/ubuntu/server.xml
+          dest: /home/ubuntu/tomcat/apache-tomcat-8.5.49/conf/
+      - name: replacing web file
+        synchronize:
+          src: /home/ubuntu/web.xml
+          dest: /home/ubuntu/tomcat/apache-tomcat-8.5.49/conf/
+      - name: Start Tomcat
+        command: "nohup /home/ubuntu/tomcat/apache-tomcat-8.5.49/bin/startup.sh"
+        tags: start
+      - name: Stop Tomcat
+        command: "nohup /home/ubuntu/tomcat/apache-tomcat-8.5.49/bin/shutdown.sh"
+        tags: stop
+      - name: copy war file
+        synchronize:
+          src: /home/ubuntu/php1.war
+          dest: /home/ubuntu/tomcat/apache-tomcat-8.5.49/webapps/
+ 
+          
