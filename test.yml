@@ -35,15 +35,26 @@
         synchronize:
           src: /home/ubuntu/web.xml
           dest: /home/ubuntu/tomcat/apache-tomcat-8.5.49/conf/
+      - name: replacing User and Password
+        synchronize:
+          src: /home/ubuntu/tomcat-users.xml
+          dest: /home/ubuntu/tomcat/apache-tomcat-8.5.49/conf/
+      - name: replacing context file
+        synchronize:
+          src: /home/ubuntu/context.xml
+          dest: /home/ubuntu/tomcat/apache-tomcat-8.5.49/webapps/manager/META-INF/
       - name: Start Tomcat
         command: "nohup /home/ubuntu/tomcat/apache-tomcat-8.5.49/bin/startup.sh"
         tags: start
       - name: Stop Tomcat
         command: "nohup /home/ubuntu/tomcat/apache-tomcat-8.5.49/bin/shutdown.sh"
         tags: stop
+      - name: download war file
+        get_url:
+           url: http://3.82.215.163:8080/nexus-latest/service/local/repositories/releases/content/com/php1/php/4.0/php-4.0.war
+           dest: /home/ubuntu/
+      - name: rename war file
+        command: mv /home/ubuntu/php-4.0.war /home/ubuntu/php.war
       - name: copy war file
-        synchronize:
-          src: /home/ubuntu/php1.war
-          dest: /home/ubuntu/tomcat/apache-tomcat-8.5.49/webapps/
- 
+        command: mv /home/ubuntu/php.war /home/ubuntu/tomcat/apache-tomcat-8.5.49/webapps/
           
